@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<title>Studio visuels</title>
+<!-- Polices locales (npm @fontsource) : aucun appel réseau pendant le rendu. -->
+<link rel="stylesheet" href="node_modules/@fontsource/cinzel/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/cinzel/500.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/cinzel/600.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/cinzel/700.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/gfs-didot/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-display/300.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-display/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-display/500.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-display/600.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-display/700.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-display/800.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-display/900.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-display/400-italic.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-display/300-italic.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/eb-garamond/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/eb-garamond/500.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/eb-garamond/600.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/eb-garamond/400-italic.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/commissioner/200.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/commissioner/300.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/commissioner/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/commissioner/500.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/commissioner/600.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/commissioner/700.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/advent-pro/200.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/advent-pro/300.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/advent-pro/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/advent-pro/500.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/advent-pro/600.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/advent-pro/700.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/jura/300.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/jura/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/jura/500.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/jura/600.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/jura/700.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/jetbrains-mono/300.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/jetbrains-mono/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/jetbrains-mono/500.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/jetbrains-mono/700.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/monoton/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/manrope/300.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/manrope/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/manrope/600.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/manrope/800.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/syne/400.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/syne/600.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/syne/700.css"/>
+<link rel="stylesheet" href="node_modules/@fontsource/syne/800.css"/>
+<style>html,body{margin:0;padding:0;background:transparent}#stage{position:relative;overflow:hidden}</style>
+<script src="content.js"></script>
+<script src="lib.js"></script>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+/* Un visuel par chargement : render.html#theme=psephide&kind=poster&id=zeugma */
+(async function () {
+  var q = new URLSearchParams(location.hash.slice(1));
+  var theme = q.get('theme'), kind = q.get('kind'), id = q.get('id');
+  var SIZES = { poster: [1080, 1350], cover: [1640, 924], profile: [1080, 1080], logo: [1600, 1600] };
+  var WH = SIZES[kind], stage = document.getElementById('stage');
+  stage.style.width = WH[0] + 'px'; stage.style.height = WH[1] + 'px';
+  try {
+    await new Promise(function (ok, ko) {
+      var s = document.createElement('script');
+      s.src = 'themes/' + theme + '.js'; s.onload = ok; s.onerror = function () { ko(new Error('thème ' + theme)); };
+      document.head.appendChild(s);
+    });
+    var T = window.THEMES[theme];
+    await Promise.all((T.fonts || []).map(function (f) { return document.fonts.load(f, 'AΩαω Éé'); }));
+    await document.fonts.ready;
+    await T.render(stage, { W: WH[0], H: WH[1], kind: kind, ed: id ? STUDIO.byId[id] : null, theme: T });
+    window.__done = 'ok';
+  } catch (e) { window.__done = 'error: ' + (e && e.stack || e); }
+})();
+</script>
+</body>
+</html>

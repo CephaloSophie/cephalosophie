@@ -4,7 +4,8 @@
    Tous les textes affichés par le script (univers KANTO APLO, Kýdos,
    studio…) sont ici, en français (fr) et en anglais (en).
    Sources : dépôt DOCUMENTATION (univers, éditeurs, Époptès, présentation),
-   vitrine kantoaplo.com (Skopos, Skhêma), dépôt kydos et kydosbelote.com.
+   vitrine kantoaplo.com (Skopos, Skhêma, Zeugma), dépôt zeugma (Psèphos),
+   dépôt kydos et kydosbelote.com.
    ═══════════════════════════════════════════════════════════════════════ */
 
 window.CEPHALO = {
@@ -14,7 +15,53 @@ window.CEPHALO = {
     kydos: 'https://kydosbelote.com',
     mail: 'contact@cephalosophie.com',
     linkedin: 'https://www.linkedin.com/in/hamdouni-ameur-ba3048a4/',
-    facebook: 'https://www.facebook.com/profile.php?id=61575597527246'
+    facebook: 'https://www.facebook.com/profile.php?id=61575597527246',
+    kydosApk: 'https://kydosbelote.com/apk/kydos.apk'
+  },
+
+  /* ── Thèmes visuels (assets/visuels/<id>/) ─────────────────────────
+     PARAMÈTRE PUBLIC : `theme` est le thème par défaut du site. Il n'est
+     exposé dans aucun menu ; on ne le redéfinit que depuis la console du
+     navigateur, et ce choix est gardé dans le localStorage :
+       cephalo.theme()            liste des thèmes et thème actif
+       cephalo.theme('marmaron')  change de thème et le garde
+       cephalo.theme(null)        revient au thème par défaut
+     Chaque thème : couverture, photo de profil, logo et une affiche par
+     éditeur (13), fabriqués par tools/studio. */
+  theme: 'psephide',
+  themes: [
+    { id: 'psephide', name: 'Ψηφιδωτό', accent: '#E3B85A', label: { fr: 'Mosaïque', en: 'Mosaic' },
+      concept: { fr: "ψηφίς, la tesselle, vient de ψῆφος, la pierre de Zeugma : chaque image est une mosaïque byzantine de milliers de psèphoi, fond d'or posé en anneaux autour du médaillon.",
+                 en: 'ψηφίς, the tessera, comes from ψῆφος, the stone of Zeugma: every image is a Byzantine mosaic of thousands of psèphoi, a gold ground laid in rings around the medallion.' } },
+    { id: 'chrysos', name: 'Χρυσός Οὐρανός', accent: '#E8C060', label: { fr: "Constellation d'or", en: 'Golden constellation' },
+      concept: { fr: "Gravure à l'or fin sur la nuit : chaque éditeur devient une constellation, tracée d'étoile en étoile dans une sphère armillaire.",
+                 en: 'Fine gold engraving on the night sky: each editor becomes a constellation, drawn star to star inside an armillary sphere.' } },
+    { id: 'marmaron', name: 'Μάρμαρον', accent: '#22E1FF', label: { fr: 'Marbre & néon', en: 'Marble & neon' },
+      concept: { fr: "Un marbre noir de Portoro veiné d'or, et chaque éditeur en tube de néon à sa couleur : l'Antiquité gravée, la lumière d'aujourd'hui.",
+                 en: "Black Portoro marble veined with gold, and each editor as a neon tube in its own colour: antiquity carved, today's light." } },
+    { id: 'keramikos', name: 'Κεραμική', accent: '#E08A55', label: { fr: 'Figures rouges', en: 'Red figures' },
+      concept: { fr: "La céramique attique : glaçure noire, figure couleur d'argile au fond d'une coupe, méandres, palmettes et nom inscrit le long du bord.",
+                 en: 'Attic pottery: black glaze, a clay-coloured figure in the bowl of a cup, meanders, palmettes and the name inscribed along the rim.' } },
+    { id: 'antikythera', name: 'Ἀντικύθηρα', accent: '#D89A4A', label: { fr: 'Le mécanisme', en: 'The mechanism' },
+      concept: { fr: "Le mécanisme d'Anticythère, premier calculateur connu : cadrans de bronze gradués, roues dentées, patine vert-de-gris. Chaque éditeur est un rouage.",
+                 en: 'The Antikythera mechanism, the first known computer: graduated bronze dials, gear wheels, verdigris. Each editor is a cog.' } },
+    { id: 'architekton', name: 'Ἀρχιτέκτων', accent: '#8FC1FF', label: { fr: "L'épure", en: 'The blueprint' },
+      concept: { fr: "Une planche d'architecte au bleu de Prusse : tracés de construction, cotes, cartouche, et la capture réelle de l'éditeur tirée en cyanotype.",
+                 en: "An architect's sheet in Prussian blue: construction lines, dimensions, title block, and the editor's real screenshot printed as a cyanotype." } },
+    { id: 'iris', name: 'Ἶρις', accent: '#C9A8FF', label: { fr: 'Prisme', en: 'Prism' },
+      concept: { fr: 'Iris, la messagère arc-en-ciel : lumière holographique, verre dépoli, lettres chromées, et les captures réelles dans des fenêtres de verre.',
+                 en: 'Iris, the rainbow messenger: holographic light, frosted glass, chrome letters, and the real screenshots in glass windows.' } }
+  ],
+  /* Les affiches de chaque thème (assets/visuels/<thème>/editeurs/<id>.jpg), regroupées. */
+  visuals: {
+    groups: [
+      { id: 'ready', title: { fr: 'Les éditeurs en ligne', en: 'Live editors' }, ids: ['skopos', 'hephaistos', 'typos', 'tekton', 'logos', 'skhema'] },
+      { id: 'zeugma', title: { fr: 'Zeugma et sa pierre', en: 'Zeugma and its stone' }, ids: ['zeugma', 'psephos'] },
+      { id: 'kydos', title: { fr: 'Kýdos', en: 'Kýdos' }, ids: ['kydos'] },
+      { id: 'pending', title: { fr: 'En composition', en: 'In composition' }, ids: ['mantis', 'kairos', 'synergos', 'hermes'] }
+    ],
+    names: { skopos: 'Skopos', hephaistos: 'Héphaïstos', zeugma: 'Zeugma', psephos: 'Psèphos', typos: 'Typos', tekton: 'Tektôn', logos: 'Logos',
+      skhema: 'Skhêma', kydos: 'Kýdos', mantis: 'Mantis', kairos: 'Kairos', synergos: 'Synergos', hermes: 'Hermès' }
   },
 
   /* ── L'univers de KANTO APLO ─────────────────────────────────────────
@@ -24,7 +71,8 @@ window.CEPHALO = {
      parent   : l'astre autour duquel il tourne (sinon l'étoile)
      perturbedBy : astres dont la gravité déforme l'orbite (Typos)
      status   : live (démo en ligne) · compose (en composition) · office (back-office)
-     page     : ancre de la section sur kantoaplo.com */
+     page     : ancre de la section sur kantoaplo.com
+     psephoi  : un anneau de pierres de domino tourne autour de l'astre (Zeugma) */
   star: {
     id: 'kanto', greek: 'ΚΆΝΤΟ ΑΠΛΌ', latin: 'KANTO APLO', color: '#C9963A',
     title: { fr: "L'étoile", en: 'The star' },
@@ -104,6 +152,14 @@ window.CEPHALO = {
               en: 'The observer, the one who keeps watch: it monitors your APIs, detects anomalies and warns you before your users notice.' },
       place: { fr: 'Satellite de Logos : il veille sur les APIs que la règle gouverne.', en: 'A satellite of Logos: it watches over the APIs the rule governs.' } },
 
+    { id: 'zeugma', greek: 'ΖΕΥΓΜΑ', latin: 'Zeugma', color: '#4FD1C5', size: 21, psephoi: true,
+      orbit: { a: 0.8, T: 70, p: 0.2 }, status: 'live', fresh: true, page: 'zeugma', shot: 'zeugma',
+      title: { fr: 'Le Lien', en: 'The Link' },
+      meaning: { fr: 'ζεῦγμα — le joug, l\u2019attelage : ce qui lie deux choses.', en: 'ζεῦγμα — the yoke, the coupling: what binds two things.' },
+      desc: { fr: "Une bibliothèque de dominos pour construire sans code des éditeurs visuels, des workflows et des outils d'automatisation. Chaque bloc est une pierre — un psèphos (ψῆφος, le caillou qui compte et qui vote) : sa face gauche dit ses entrées, sa face droite ses sorties, la couleur de chaque point son type de connexion. Les psèphoi se collent comme au jeu ou se relient par des fils.",
+              en: 'A domino library for building visual editors, workflows and automation tools without code. Every block is a stone — a psèphos (ψῆφος, the pebble that counts and votes): its left face states its inputs, its right face its outputs, the colour of each pip its connection type. Psèphoi snap together as in the game or connect with wires.' },
+      place: { fr: "Planète ceinte d'un anneau de psèphoi : ses pierres tournent avec elle et s'emboîtent pour lier les mondes.", en: 'A planet girdled with a ring of psèphoi: its stones turn with it and lock together to bind the worlds.' } },
+
     { id: 'hermes', greek: 'ἙΡΜΗ͂Σ', latin: 'Hermès', color: '#E8714A', size: 19,
       orbit: { a: 0.9, T: 58, p: 5.3 }, status: 'compose', page: 'hermes',
       title: { fr: 'Le Messager', en: 'The Messenger' },
@@ -132,8 +188,8 @@ window.CEPHALO = {
   },
 
   poem: {
-    fr: ['La forge précède le bâtisseur.', 'Le bâtisseur précède la règle.', "Et le modèle, enfant du bâtisseur mais influencé par le devin et le collaborateur, danse sur une orbite qui n'appartient qu'à lui.", "Ensemble, ils construisent ce que l'étoile illumine."],
-    en: ['The forge comes before the builder.', 'The builder comes before the rule.', 'And the mould, child of the builder yet swayed by the seer and the collaborator, dances on an orbit of its own.', 'Together, they build what the star illuminates.']
+    fr: ['La forge précède le bâtisseur.', 'Le bâtisseur précède la règle.', "Et le modèle, enfant du bâtisseur mais influencé par le devin et le collaborateur, danse sur une orbite qui n'appartient qu'à lui.", 'Zeugma attelle les pierres, et chaque psèphos compte.', "Ensemble, ils construisent ce que l'étoile illumine."],
+    en: ['The forge comes before the builder.', 'The builder comes before the rule.', 'And the mould, child of the builder yet swayed by the seer and the collaborator, dances on an orbit of its own.', 'Zeugma yokes the stones, and every psèphos counts.', 'Together, they build what the star illuminates.']
   },
 
   /* De l'idée à l'application : le chemin à travers les éditeurs. */
@@ -144,6 +200,7 @@ window.CEPHALO = {
     { id: 'tekton', fr: 'Bâtir', en: 'Build' },
     { id: 'logos', fr: 'Gouverner', en: 'Govern' },
     { id: 'synergos', fr: 'Connecter', en: 'Connect' },
+    { id: 'zeugma', fr: 'Relier', en: 'Link' },
     { id: 'hermes', fr: 'Orchestrer', en: 'Orchestrate' },
     { id: 'skopos', fr: 'Veiller', en: 'Watch' },
     { id: 'mantis', fr: 'Prédire', en: 'Predict' },
@@ -199,13 +256,25 @@ window.CEPHALO = {
         text: { fr: 'Quatre joueurs, deux équipes, la belote contrée dans sa forme la plus pure, avec deux gagnants.',
                 en: 'Four players, two teams, belote contrée in its purest form, with two winners.' } }
     ],
+    /* Ce qui vient d'arriver dans l'application (dépôt kydos, lignée v19). */
+    news: [
+      { fr: 'Équipes et messagerie', en: 'Teams and messaging', d_fr: "Canal d'équipe, salon public, messages privés, et une aide qui répond dans l'application.", d_en: 'Team channel, public lounge, private messages, and in-app support.' },
+      { fr: 'Cartes de collection', en: 'Collectible cards', d_fr: 'Chaque avatar peut devenir une carte numérotée, à gagner, à offrir ou à échanger à la Bourse.', d_en: 'Every avatar can become a numbered card, to win, give or trade on the exchange.' },
+      { fr: '180 personnages', en: '180 characters', d_fr: '80 robots et 100 humains, chacun avec son histoire, sa garde-robe et ses animations.', d_en: '80 robots and 100 humans, each with a story, a wardrobe and animations.' },
+      { fr: 'Le cerveau V2', en: 'The V2 brain', d_fr: 'Huit décisions, en règles visuelles ou en JavaScript, avec simulateur et banc d’essai.', d_en: 'Eight decisions, as visual rules or JavaScript, with a simulator and a test bench.' },
+      { fr: 'Tables privées', en: 'Private tables', d_fr: 'Publique, équipe ou sur invitation, avec un code à partager dans la messagerie.', d_en: 'Public, team or invite-only, with a code to share in the messenger.' },
+      { fr: 'Android, dès maintenant', en: 'Android, right now', d_fr: "L'application se télécharge sur kydosbelote.com ; les stores arrivent.", d_en: 'The app downloads from kydosbelote.com; the stores are coming.' }
+    ],
     screens: [
       { file: 'table-pixi', fr: 'La table en temps réel, rendue en WebGL', en: 'The real-time table, rendered in WebGL' },
       { file: 'ecurie', fr: "L'écurie : ses robots, leurs niveaux, leur forme", en: 'The stable: your robots, their levels, their form' },
       { file: 'editeur-strategie', fr: 'Le réglage d’un robot : personnalité et cerveau', en: 'Tuning a robot: personality and brain' },
       { file: 'tableau-tournoi', fr: 'Un tournoi en direct, du huitième à la finale', en: 'A live tournament, from round of 16 to final' },
       { file: 'duo-acier-live', fr: 'Duo d’Acier en direct : seuls les robots jouent', en: 'Steel Duo live: only robots play' },
-      { file: 'podium', fr: 'Le podium de fin de tournoi', en: 'The end-of-tournament podium' }
+      { file: 'podium', fr: 'Le podium de fin de tournoi', en: 'The end-of-tournament podium' },
+      { file: 'equipe', fr: "Mon équipe : membres, score d'équipe, canal", en: 'My team: members, team score, channel' },
+      { file: 'classements', fr: 'Les classements de la semaine', en: 'The weekly leaderboards' },
+      { file: 'boutique-vip', fr: 'La boutique et le VIP', en: 'The shop and VIP' }
     ],
     /* Ce que réunit un jeu de cartes multijoueur temps réel. */
     forge: [
@@ -217,9 +286,9 @@ window.CEPHALO = {
       { fr: 'Back-office', en: 'Back office', d_fr: 'Tout se pilote sans redéploiement.', d_en: 'Everything is tuned without redeploying.' }
     ],
     stats: [
-      { v: '641', fr: 'tests automatisés', en: 'automated tests' },
-      { v: '146', fr: "endpoints d'API documentés", en: 'documented API endpoints' },
-      { v: '24', fr: 'pages de back-office', en: 'back-office pages' },
+      { v: '1519', fr: 'tests de non-régression', en: 'regression tests' },
+      { v: '136', fr: "routes d'API de jeu", en: 'game API routes' },
+      { v: '180', fr: 'personnages, robots et humains', en: 'characters, robots and humans' },
       { v: '128', fr: 'joueurs par tournoi', en: 'players per tournament' }
     ]
   },

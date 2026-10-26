@@ -1,7 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════
    CEPHALO SOPHIE — comportement du site
    Ciel étoilé (dessiné une fois), tête-constellation, changement d'ambiance
-   par section, univers KANTO APLO vivant, sections Kýdos.
+   par section, univers KANTO APLO vivant, sections Kýdos, galerie du thème
+   visuel actif (choisi par la console seulement : cephalo.theme('…')).
    Aucun écouteur de scroll : IntersectionObserver partout. L'univers ne
    s'anime que lorsqu'il est à l'écran.
    ═══════════════════════════════════════════════════════════════════════ */
@@ -26,6 +27,52 @@
     return '<' + tag + ' data-fr>' + esc(o.fr) + '</' + tag + '><' + tag + ' data-en>' + esc(o.en) + '</' + tag + '>';
   }
   function L(fr, en) { return { fr: fr, en: en }; }
+
+  /* ════════════════ Thème visuel ════════════════
+     Paramètre public : D.theme (data.js). Aucune commande dans l'interface ;
+     on ne le redéfinit que depuis la console, et le choix est gardé dans le
+     localStorage. Les fonctions de rendu inscrites dans `themeHooks` sont
+     rappelées à chaque changement. */
+  var THEME_KEY = 'cephalo-theme', themeHooks = [];
+  function themeById(id) { return D.themes.filter(function (t) { return t.id === id; })[0] || null; }
+  var theme = (function () {
+    var saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) { /* stockage indisponible : thème par défaut */ }
+    return themeById(saved) || themeById(D.theme) || D.themes[0];
+  })();
+  function vis(file) { return 'assets/visuels/' + theme.id + '/' + file; }
+  function applyTheme() {
+    root.dataset.theme = theme.id;
+    root.style.setProperty('--th', theme.accent);
+    themeHooks.forEach(function (fn) { fn(); });
+  }
+  window.cephalo = {
+    /* cephalo.theme()          liste des thèmes et thème actif
+       cephalo.theme('marmaron') change de thème et le garde
+       cephalo.theme(null)       oublie le choix : retour au thème par défaut */
+    theme: function (id) {
+      if (!arguments.length) {
+        if (console.table) console.table(D.themes.map(function (t) {
+          return { id: t.id, nom: t.name, style: t.label.fr, actif: t.id === theme.id ? '●' : '', 'par défaut': t.id === D.theme ? '●' : '' };
+        }));
+        return theme.id;
+      }
+      if (id === null) {
+        try { localStorage.removeItem(THEME_KEY); } catch (e) { /* rien à oublier */ }
+        theme = themeById(D.theme) || D.themes[0];
+      } else {
+        var t = themeById(String(id));
+        if (!t) { console.warn('Thème inconnu : ' + id + '. Thèmes : ' + D.themes.map(function (x) { return x.id; }).join(', ')); return theme.id; }
+        theme = t;
+        try { localStorage.setItem(THEME_KEY, t.id); } catch (e) { console.warn('localStorage indisponible : le thème ne sera pas gardé.'); }
+      }
+      applyTheme();
+      return theme.id;
+    },
+    themes: D.themes.map(function (t) { return t.id; })
+  };
+  root.dataset.theme = theme.id;
+  root.style.setProperty('--th', theme.accent);
 
   /* ════════════════ Ciel : dessiné une seule fois (pas d'animation par image) ════════════════ */
   var sky = $('sky');
@@ -200,13 +247,14 @@
     function makeBody(b, cls) {
       var el = document.createElement('button');
       el.type = 'button';
-      el.className = 'body ' + (cls || '') + (b.massive ? ' massive' : '');
+      el.className = 'body ' + (cls || '') + (b.massive ? ' massive' : '') + (b.psephoi ? ' ringed' : '');
       el.style.setProperty('--c', b.color);
       el.setAttribute('aria-label', b.latin + ' — ' + b.title.fr);
       el.dataset.id = b.id;
       el.innerHTML = (cls === 'eye'
         ? '<span class="sph"></span><svg viewBox="-20 -20 40 40" aria-hidden="true"><circle r="17" class="eye-ring"/><path d="M-13,0 Q0,-11 13,0 Q0,11 -13,0 Z" fill="rgba(230,214,168,.12)" stroke="#E6D6A8" stroke-width="1.2"/><circle r="4.2" fill="#E6D6A8"/><circle r="1.6" fill="#05040d"/></svg>'
         : '<span class="sph"></span>') +
+        (b.psephoi ? '<span class="ring" aria-hidden="true"></span>' : '') +
         '<span class="lbl">' + esc(b.latin) + '</span>';
       cosmos.appendChild(el);
       b.el = el;
@@ -217,7 +265,7 @@
     makeBody(obs, 'eye');
 
     /* Puces : accès direct (clavier, mobile, lecteurs d'écran). */
-    var tourOrder = ['kanto', 'hephaistos', 'tekton', 'typos', 'logos', 'skopos', 'mantis', 'synergos', 'kairos', 'hermes', 'skhema', 'epoptes'];
+    var tourOrder = ['kanto', 'hephaistos', 'tekton', 'typos', 'logos', 'skopos', 'zeugma', 'mantis', 'synergos', 'kairos', 'hermes', 'skhema', 'epoptes'];
     chips.innerHTML = tourOrder.map(function (id) {
       var b = byId[id];
       return '<button type="button" class="chip" role="tab" aria-selected="false" data-id="' + id + '" style="--c:' + b.color + '"><i></i>' + esc(b.latin) + '</button>';
@@ -319,6 +367,19 @@
       office: L('Back-office · équipe Cephalo Sophie', 'Back office · Cephalo Sophie team')
     };
     var current = null;
+    /* Affiche du thème actif (si l'astre en a une) et capture réelle de l'éditeur. */
+    function panelMedia(b) {
+      var poster = D.visuals.names[b.id] ? '<button type="button" class="pn-vis" data-full="' + vis('editeurs/' + b.id + '.jpg') + '" aria-label="' + esc(b.latin) + ' — affiche">' +
+        '<img src="' + vis('mini/' + b.id + '.webp') + '" alt="" loading="lazy" decoding="async"/></button>' : '';
+      var shot = b.shot ? '<figure class="pn-shot"><img src="assets/img/kanto/' + b.shot + '.webp" alt="' + esc(b.latin) + '" loading="lazy" decoding="async"/></figure>' : '';
+      if (!poster && !shot) return '';
+      return '<div class="pn-media' + (poster && shot ? ' two' : '') + '">' + poster + shot + '</div>';
+    }
+    panel.addEventListener('click', function (e) {
+      var v = e.target.closest('.pn-vis');
+      if (v) openLb(v.dataset.full, v.getAttribute('aria-label'));
+    });
+    themeHooks.push(function () { if (current) showPanel(current); });
     function showPanel(b) {
       var tags = '<span class="tag ' + b.status + '">' + bi(STATUS[b.status]) + (b.version ? ' · ' + esc(b.version) : '') + '</span>';
       if (b.internal) tags += '<span class="tag">' + bi(L('Atelier interne', 'In-house workshop')) + '</span>';
@@ -332,7 +393,7 @@
         '<p class="pn-mean">' + bi(b.meaning) + '</p>' +
         '<p class="pn-desc">' + bi(b.desc) + '</p>' +
         '<p class="pn-place"><b>' + bi(L("Dans l'univers", 'In the universe')) + '</b>' + bi(b.place) + '</p>' +
-        (b.shot ? '<figure class="pn-shot"><img src="assets/img/kanto/' + b.shot + '.webp" alt="' + esc(b.latin) + '" loading="lazy" decoding="async"/></figure>' : '') +
+        panelMedia(b) +
         (link ? '<a class="pn-link" href="' + esc(link) + '" target="_blank" rel="noopener">' + bi(L('Voir sur kantoaplo.com', 'See it on kantoaplo.com')) + ' ↗</a>' : '') +
         '</div>';
     }
@@ -410,6 +471,10 @@
     return '<img class="bot' + (i === 2 ? ' mid' : '') + '" src="' + MASCOT(m) + '" alt="" width="120" height="300" loading="lazy" style="--d:' + (i * 0.12).toFixed(2) + 's"/>';
   }).join('');
   $('crew').setAttribute('data-reveal', '');
+
+  $('kyNews').innerHTML = K.news.map(function (n, i) {
+    return '<li data-reveal style="--d:' + (i % 3) * 90 + 'ms"><b>' + bi(n) + '</b><span>' + bi(L(n.d_fr, n.d_en)) + '</span></li>';
+  }).join('');
 
   var fanAngles = [-14, -7, 0, 7, 14], fanY = [34, 9, 0, 9, 34], fanX = [-2, -1, 0, 1, 2];
   $('fan').innerHTML = K.cards.map(function (c, i) {
@@ -499,6 +564,36 @@
   }
   lb.addEventListener('click', closeLb);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !lb.hidden) closeLb(); });
+
+  /* ════════════════ Galerie : les visuels du thème actif ════════════════ */
+  (function gallery() {
+    var V = D.visuals;
+    function render() {
+      $('themeName').textContent = theme.name;
+      $('themeConcept').innerHTML = bi(theme.concept);
+      $('fbCover').src = vis('couverture.jpg');
+      $('fbCover').alt = 'Cephalo Sophie — ' + theme.name;
+      $('fbProfile').src = vis('profil.jpg');
+      $('visGroups').innerHTML = V.groups.map(function (g) {
+        return '<div class="vis-group" data-g="' + g.id + '" style="--n:' + g.ids.length + '"><h3 class="vis-title">' + bi(g.title) + '<small>' + g.ids.length + '</small></h3>' +
+          '<ul class="vis-grid">' + g.ids.map(function (id, i) {
+            return '<li style="--i:' + i + '"><button type="button" class="vis-card" data-full="' + vis('editeurs/' + id + '.jpg') + '" aria-label="' + esc(V.names[id]) + '">' +
+              '<img src="' + vis('mini/' + id + '.webp') + '" alt="" width="480" height="600" loading="lazy" decoding="async"/>' +
+              '<span>' + esc(V.names[id]) + '</span></button></li>';
+          }).join('') + '</ul></div>';
+      }).join('') +
+        // le logo, fond transparent, à la suite des éditeurs en ligne
+        '<div class="vis-group vis-logo" style="--n:1"><h3 class="vis-title">Logo</h3><ul class="vis-grid"><li><button type="button" class="vis-card" data-full="' + vis('logo.png') + '" aria-label="Cephalo Sophie — logo">' +
+        '<img src="' + vis('mini/logo.webp') + '" alt="" width="400" height="400" loading="lazy" decoding="async"/><span>' + bi(L('Fond transparent', 'Transparent')) + '</span></button></li></ul></div>';
+    }
+    render();
+    themeHooks.push(render);
+    $('visGroups').addEventListener('click', function (e) {
+      var c = e.target.closest('.vis-card');
+      if (c) openLb(c.dataset.full, c.getAttribute('aria-label'));
+    });
+    document.querySelector('.fb-cover').addEventListener('click', function () { openLb(vis('couverture.jpg'), 'Cephalo Sophie'); });
+  })();
 
   /* ════════════════ Studio ════════════════ */
   $('skills').innerHTML = D.expertise.map(function (s) { return '<li>' + bi(s) + '</li>'; }).join('');
